@@ -12,6 +12,7 @@ import (
 
 // MARK: - Structs -
 type BuildDatum struct {
+	Id         string `json:"id"`
 	ModuleName string `json:"module_name"`
 	Duration   int    `json:"duration"`
 }
@@ -27,10 +28,23 @@ func getAllData(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(BuildData)
 }
 
+func getSingleData(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Endpoint being hit: getSingleData")
+	vars := mux.Vars(r)
+	key := vars["id"]
+
+	for _, data := range BuildData {
+		if data.Id == key {
+			json.NewEncoder(w).Encode(data)
+		}
+	}
+}
+
 func handleRequests() {
 	myRouter := mux.NewRouter().StrictSlash(true)
 	myRouter.HandleFunc("/", homePage)
-	myRouter.HandleFunc("/all", getAllData)
+	myRouter.HandleFunc("/data", getAllData)
+	myRouter.HandleFunc("/data/{id}", getSingleData)
 	log.Fatal(http.ListenAndServe(":8081", myRouter))
 }
 
@@ -38,8 +52,8 @@ func main() {
 	fmt.Println("Rest API v2.0 - Mux Routers")
 	mypackage.PrintHello()
 	BuildData = []BuildDatum{
-		BuildDatum{ModuleName: "ShipperPicker", Duration: 10},
-		BuildDatum{ModuleName: "Checkout", Duration: 20},
+		{Id: "0", ModuleName: "ShipperPicker", Duration: 10},
+		{Id: "1", ModuleName: "Checkout", Duration: 20},
 	}
 	handleRequests()
 }
